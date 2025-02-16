@@ -8,7 +8,6 @@ use zbus_macros::dbus_interface;
 
 use tokio::sync::Mutex;
 
-use crate::performance::gpu::amd::amdgpu::AmdGpu;
 use crate::performance::gpu::connector::Connector;
 use crate::performance::gpu::dbus::devices::GPUDevices;
 use crate::performance::gpu::dbus::tdp::GPUTDPDBusIface;
@@ -380,28 +379,6 @@ pub async fn get_gpu(path: String) -> Result<GPUDBusInterface, std::io::Error> {
 
     // Sanitize the vendor strings so they are standard
     match vendor.unwrap().as_str() {
-        // AMD Implementation
-        "AMD"
-        | "AuthenticAMD"
-        | "AuthenticAMD Advanced Micro Devices, Inc."
-        | "Advanced Micro Devices, Inc. [AMD/ATI]" => Ok(GPUDBusInterface::new(Arc::new(
-            Mutex::new(GPUDevices::AmdGpu(AmdGpu {
-                name: filename.to_string(),
-                path: path.clone(),
-                class: class.to_string(),
-                class_id,
-                vendor: "AMD".to_string(),
-                vendor_id,
-                device: device.unwrap_or("".to_string()),
-                device_id,
-                //device_type: "".to_string(),
-                subdevice: subdevice.unwrap_or("".to_string()),
-                subdevice_id,
-                subvendor_id,
-                revision_id,
-            })),
-        ))
-        .await),
         // Intel Implementation
         "Intel" | "GenuineIntel" | "Intel Corporation" => Ok(GPUDBusInterface::new(Arc::new(
             Mutex::new(GPUDevices::IntelGpu(IntelGPU {
